@@ -20,10 +20,6 @@ The device is based on a modified Epson TM-T20III platform and has been custom-e
 - Use only power supplies listed in the user instruction
 
 ## Setup
-- <a href="https://www.python.org/downloads/" target="_blank">Python</a> is required
-- <a href="https://pypi.org/project/pip/" target="_blank">Pip</a> is required
-- <a href="https://wiki.ubuntuusers.de/Makefile/" target="_blank">Makefile</a> is required<br/>
-
 1. Clone the `installer.example.sh`, rename the file to `installer.sh` and fill in the config block at the top of the file.
 2. Copy the installer script into `/home/pi` to the Raspberry Pi Zero W
 3. SSH into the Raspberry Pi Zero W and run the installer using:
