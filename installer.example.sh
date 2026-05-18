@@ -3,15 +3,6 @@
 # =============================================================================
 # Raspberry Pi Zero Printer installer script
 # =============================================================================
-# USAGE:
-#   1. Copy this script to the Pi:
-#        scp setup-rpi-printer.sh [INITIAL_USERNAME]@<IP>:/home/[INITIAL_USERNAME]/
-#   2. SSH in and run:
-#        chmod +x setup-rpi-printer.sh && sudo bash setup-rpi-printer.sh
-#
-# The script must be run as root (sudo).
-# Set ROOT_PASSWORD in the config block before running.
-# =============================================================================
 
 set -e  # Exit immediately on error
 
