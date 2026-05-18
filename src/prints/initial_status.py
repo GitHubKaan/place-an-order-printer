@@ -51,7 +51,7 @@ def print_initial_failure() -> None:
     if _initial_status_already_printed():
         print("Initial startup receipt already printed for this boot.")
         return
-        
+
     try:
         now = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
         printer.set(align="center", bold=True, width=2, height=2)
@@ -68,6 +68,7 @@ def print_initial_failure() -> None:
         printer.text("\n\n")
         printer.cut()
         print("Initial failure receipt printed.")
+        _mark_initial_status_printed()
     except Exception as exc:
         print(f"Failed to print failure receipt: {exc}")
         raise
