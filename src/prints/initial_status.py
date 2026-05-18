@@ -12,7 +12,9 @@ def _initial_status_already_printed() -> bool:
 
 def _mark_initial_status_printed() -> None:
     try:
-        _get_boot_marker_path().write_text(datetime.now().isoformat())
+        path = _get_boot_marker_path()
+        path.parent.mkdir(parents=True, exist_ok=True)  # ← Das fehlt!
+        path.write_text(datetime.now().isoformat())
     except Exception as e:
         print(f"Warning: Could not write boot marker: {e}")
 
