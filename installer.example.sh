@@ -17,8 +17,8 @@ set -e  # Exit immediately on error
 
 # ── General Config ────────────────────────────────────────────────────────────
 NEW_USER="rpi-pao-printer"
-OLD_USER=""
-ROOT_PASSWORD=""
+OLD_USER="pi" # When creating a partition, use "pi" as the username
+ROOT_PASSWORD="" # When creating a partition, enter the root password here
 SSH_PORT="22" # changing is not nessesary; but if changed be sure to reconnect to the server during installation
 TIMEZONE="Europe/Berlin"
 APP_DIR="/home/${NEW_USER}/place-an-order-printer"
