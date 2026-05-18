@@ -4,7 +4,7 @@ import logging
 import websockets
 
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
-from src.prints.initial_status import print_initial_status
+from src.prints.initial_status import print_initial_status, print_initial_failure
 from src.prints.receipt import print_receipt
 from src.utils.env_reader import Env, build_ws_url
 
@@ -48,6 +48,11 @@ class WebSocketListener:
                 first_attempt = False
                 status_message = "connected" if success else "not connected"
                 print(f"[STATUS] Initial WebSocket-Status: {status_message}")
+                
+                # Print initial failure on first attempt if connection fails
+                if not success and self._initial_start:
+                    print_initial_failure()
+                    self._initial_start = False
 
             if not self._running:
                 break

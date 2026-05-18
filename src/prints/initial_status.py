@@ -33,13 +33,39 @@ def print_initial_status() -> None:
         printer.text("\n")
         printer.text("==============================\n")
         printer.set(align="center", bold=True)
-        printer.text("System erfolgreich gestartet\n")
+        printer.text("System erfolgreich mit Place An Order Servern verbunden\n")
         printer.text("\n\n")
         printer.cut()
         print("Initial startup receipt printed.")
         _mark_initial_status_printed()
     except Exception as exc:
         print(f"Failed to print startup receipt: {exc}")
+        raise
+    finally:
+        try:
+            printer.close()
+        except Exception:
+            pass
+
+def print_initial_failure() -> None:
+    try:
+        now = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        printer.set(align="center", bold=True, width=2, height=2)
+        printer.text("SYSTEM START\n")
+        printer.set(align="center", bold=False, width=1, height=1)
+        printer.text("==============================\n")
+        printer.set(align="left")
+        printer.text("Place An Order Printer\n")
+        printer.text(f"Zeitpunkt: {now}\n")
+        printer.text("\n")
+        printer.text("==============================\n")
+        printer.set(align="center", bold=True)
+        printer.text("Systemstart konnte sich nicht mit Place An Order Servern verbinden\n")
+        printer.text("\n\n")
+        printer.cut()
+        print("Initial failure receipt printed.")
+    except Exception as exc:
+        print(f"Failed to print failure receipt: {exc}")
         raise
     finally:
         try:
