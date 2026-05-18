@@ -179,6 +179,12 @@ echo "SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"${EPSON_VENDOR}\", ATTRS{idProduct}
 udevadm control --reload-rules
 udevadm trigger
 
+# ── Runtime directory for boot marker ────────────────────────────────────────
+echo "d /run/place-an-order-printer 0755 ${NEW_USER} ${NEW_USER} -" \
+  | tee /etc/tmpfiles.d/place-an-order-printer.conf
+systemd-tmpfiles --create /etc/tmpfiles.d/place-an-order-printer.conf
+# ─────────────────────────────────────────────────────────────────────────────
+
 info "Python packages, Git and USB rules configured."
 
 # =============================================================================

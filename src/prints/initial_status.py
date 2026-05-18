@@ -5,7 +5,7 @@ from src.utils.config import printer
 
 def _get_boot_marker_path() -> Path:
     boot_id = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
-    return Path(f"/run/place-an-order-printer-boot-{boot_id}")
+    return Path(f"/run/place-an-order-printer/boot-{boot_id}")
 
 def _initial_status_already_printed() -> bool:
     return _get_boot_marker_path().exists()
