@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 import websockets
 
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
@@ -10,6 +11,7 @@ from src.utils.env_reader import Env, build_ws_url
 
 class WebSocketListener:
     _initial_start = True
+    _boot_marker_path = "/run/printservice-booted"
 
     def __init__(self, env: Env) -> None:
         self._env = env
@@ -22,9 +24,23 @@ class WebSocketListener:
         self._running = False
         self._connection_opened = False
         self._debug = env.websocket_client_debug
+        self._print_initial_on_first_boot = self._is_first_boot_start()
 
         if not self.token:
             print("[ WARNING ] DEVICE_TOKEN is not set – connecting without auth token.")
+
+    def _is_first_boot_start(self) -> bool:
+        if os.path.exists(self._boot_marker_path):
+            return False
+
+        try:
+            with open(self._boot_marker_path, "w", encoding="utf-8") as marker:
+                marker.write("booted\n")
+        except Exception as exc:
+            print(f"[ WARNING ] Could not create boot marker {self._boot_marker_path}: {exc}")
+            return False
+
+        return True
 
     def start(self) -> None:
         self._running = True
@@ -135,9 +151,10 @@ class WebSocketListener:
         if operation == "INITIAL":
             print("[ INFO ] Initial receipt stream confirmed – no action.")
 
-            if self._initial_start:  # Only print once on device start (not when connection is lost and reconnected)
+            if self._initial_start and self._print_initial_on_first_boot:
                 print_initial_status()
                 self._initial_start = False
+                self._print_initial_on_first_boot = False
 
             return
 
