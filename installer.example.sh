@@ -9,7 +9,7 @@ set -e  # Exit immediately on error
 # ── General Config ────────────────────────────────────────────────────────────
 NEW_USER="rpi-pao-printer"
 OLD_USER="pi" # When creating a partition, use "pi" as the username
-ROOT_PASSWORD="" # When creating a partition, enter the root password here
+ROOT_PASSWORD="" # When creating a partition, enter the root password here (the password will not be changed; will be the password for the user "NEW_USER")
 SSH_PORT="22" # changing is not nessesary; but if changed be sure to reconnect to the server during installation
 TIMEZONE="Europe/Berlin"
 APP_DIR="/home/${NEW_USER}/place-an-order-printer"
@@ -79,7 +79,8 @@ section "3 - Create new user: ${NEW_USER}"
 if id "${NEW_USER}" &>/dev/null; then
   warn "User ${NEW_USER} already exists — skipping creation."
 else
-  adduser "${NEW_USER}"
+  useradd -m -s /bin/bash "${NEW_USER}"
+  echo "${NEW_USER}:${ROOT_PASSWORD}" | chpasswd
   usermod -aG sudo "${NEW_USER}"
   info "User ${NEW_USER} created and added to sudo group."
 fi
