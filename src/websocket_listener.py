@@ -9,7 +9,7 @@ from src.prints.receipt import print_receipt
 from src.utils.env_reader import Env, build_ws_url
 
 class WebSocketListener:
-    _initial_start_done = False
+    _initial_start = True
 
     def __init__(self, env: Env) -> None:
         self._env = env
@@ -135,9 +135,9 @@ class WebSocketListener:
         if operation == "INITIAL":
             print("[ INFO ] Initial receipt stream confirmed – no action.")
 
-            if self._initial_start_done:  # Only print once on device start (not when connection is lost and reconnected)
+            if self._initial_start:  # Only print once on device start (not when connection is lost and reconnected)
                 print_initial_status()
-                self._initial_start_done = False
+                self._initial_start = False
 
             return
 
