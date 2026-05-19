@@ -49,7 +49,10 @@ class WebSocketListener:
                 
                 # Print initial failure on first attempt if connection fails
                 if not success:
-                    print_initial_failure()
+                    try:
+                        print_initial_failure()
+                    except Exception as exc:
+                        print(f"[ ERROR ] Failure receipt print failed: {exc}")
 
             if not self._running:
                 break
@@ -135,10 +138,10 @@ class WebSocketListener:
             return
 
         if operation == "INITIAL":
-            print("[ INFO ] Initial receipt stream confirmed – no action.")
-
-            print_initial_status()
-
+            try:
+                print_initial_status()
+            except Exception as exc:
+                print(f"[ ERROR ] Initial status print failed: {exc}")
             return
 
         if data:
