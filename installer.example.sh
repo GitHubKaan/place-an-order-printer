@@ -321,18 +321,6 @@ systemctl start printservice-update.timer
 info "Automatic update timer registered."
 
 # =============================================================================
-section "13 - Remove old default user (${OLD_USER})"
-# =============================================================================
-warn "──────────────────────────────────────────────────────────────"
-warn "The old user '${OLD_USER}' has NOT been deleted automatically."
-warn "Before deleting:"
-warn "  1. Log OUT of this session"
-warn "  2. Log IN as ${NEW_USER} on port ${SSH_PORT}"
-warn "  3. Verify sudo works: sudo whoami"
-warn "  4. Then run: sudo userdel -r -f ${OLD_USER}"
-warn "──────────────────────────────────────────────────────────────"
-
-# =============================================================================
 section "Setup complete!"
 # =============================================================================
 echo ""
@@ -346,3 +334,12 @@ echo ""
 echo -e "${YELLOW}Remember to reboot for all changes to take effect:${NC}"
 echo "     sudo shutdown -r now"
 echo ""
+
+warn "──────────────────────────────────────────────────────────────"
+warn "The old user '${OLD_USER}' has NOT been deleted automatically."
+warn "Before deleting:"
+warn "  1. Log OUT of this session"
+warn "  2. Log IN as ${NEW_USER} on port ${SSH_PORT}"
+warn "  3. Verify sudo works: sudo whoami"
+warn "  4. Then run: sudo userdel -r -f ${OLD_USER}"
+warn "──────────────────────────────────────────────────────────────"
