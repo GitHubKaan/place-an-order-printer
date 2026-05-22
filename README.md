@@ -26,10 +26,6 @@ The device is based on a modified Epson TM-T20III platform and has been custom-e
 ```bash
 chmod +x installer.sh && sudo bash installer.sh
 ```
-4. Reboot using:
-```bash
-sudo shutdown -r now
-```
 
 ## Environment
 For local development, create a `.env.dev` and a `.env.prod` file inside the root directory using _.env.example_ as a template.
