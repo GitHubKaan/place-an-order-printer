@@ -49,3 +49,12 @@ sudo systemctl start printservice-update.service
 ## Tamper-evident Seal
 The official Place An Order tamper-evident seal should look like this:<br/>
 <img src="assets/pao_tamper_evident_seal.png" alt="pao tamper evident seal" width="200px"/>
+
+## Development build
+This device is an early development build and does not fully reflect the specifications or configuration of the production units provided. Additional components and design modifications were implemented in later production versions. Board layouts, and chipset configurations may vary depending on the development stage and manufacturing date.<br/>
+<img src="assets/device/IMG_1040.png" alt="device" width="300px"/>
+<img src="assets/device/IMG_1041.png" alt="device" width="300px"/>
+<img src="assets/device/IMG_1042.png" alt="device" width="300px"/>
+<img src="assets/device/IMG_1043.png" alt="device" width="300px"/>
+<img src="assets/device/IMG_1045.png" alt="device" width="300px"/>
+<img src="assets/device/IMG_1047.png" alt="device" width="300px"/>
