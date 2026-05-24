@@ -70,13 +70,16 @@ def print_receipt(data: dict) -> None:
         printer.text("ist nun einsatzbereit.\n")
         printer.text("\n")
 
+        printer.text(f"Erstellungsdatum: {created}\n")
+        printer.text("\n")
+        
         print_line()
         printer.text("\n")
         
         printer.set(align="left", bold=False, width=1, height=1)
         printer.image(combine_logos(prepare_pao_logo_small(), prepare_turanics_logo()))
         printer.text("\n")
-    
+
         printer.image(str(prepare_text_qr_code()))
 
         printer.text("\n")
