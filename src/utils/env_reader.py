@@ -86,8 +86,7 @@ class EnvReaderUtil:
         port = f":{self.api_port}" if self.api_port else ""
         backend = self._build_backend_path()
         ws_path = self.websocket_path.strip("/") if self.websocket_path else "ws"
-        path = f"/{ws_path}" if ws_path else ""
-        return f"{scheme}://{www_prefix}{host}{port}{backend}{path}"
+        return f"{scheme}://{www_prefix}{host}{port}{backend}/{ws_path}"
 
     @staticmethod
     def load_environment(env: str) -> None:
