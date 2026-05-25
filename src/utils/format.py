@@ -1,183 +1,139 @@
-from PIL import Image, ImageDraw, ImageFont
-from src.utils.config import printer
+from datetime import datetime
 from pathlib import Path
+from PIL import Image, ImageDraw
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
-def print_line(width=1000, height=2):
-    img = Image.new("1", (width, height), 1)
-    draw = ImageDraw.Draw(img)
-    draw.line((0, 0, width, 0), fill=0, width=2)
-    printer.image(img)
+from src.utils.config import PrinterConfig, get_printer
+from src.utils.env_reader import EnvReaderUtil
 
-def prepare_pao_logo() -> Path | None:
-    logo_src = Path("assets") / "logo" / "pao_logo_black_v1.png"
-    logo_dest = Path("assets") / "logo" / "pao_logo_resized.png"
+class FormatUtil:
+    _ASSET_DIR = Path("assets")
 
-    if not logo_src.exists():
-        print("Logo not found at '%s' - skipping logo.", logo_src)
-        return None
+    @classmethod
+    def _prepare_img(
+        cls,
+        source: Path,
+        destination: Path,
+        target_width: int,
+    ) -> Path | None:
+        """
+        Prepares images for receipts
+        """
 
-    img = Image.open(logo_src).convert("RGBA")
+        if not source.exists():
+            print(f"Image not found: {source}")
+            return None
 
-    # Apply white background behind transparent areas
-    background = Image.new("RGBA", img.size, (255, 255, 255, 255))
-    background.paste(img, mask=img.split()[3])
+        if destination.exists():
+            print(f"Using cached image: {destination}")
+            return destination
 
-    img = background.convert("RGB")
+        img = Image.open(source).convert("RGBA")
 
-    # Resize while preserving aspect ratio
-    logo_width = 200
-    height = int(img.height * (logo_width / img.width))
-    img = img.resize((logo_width, height), Image.LANCZOS)
+        # White background for transparency
+        background = Image.new("RGBA", img.size, (255, 255, 255, 255))
+        background.paste(img, mask=img.split()[3])
 
-    # Convert image to black and white
-    img = img.convert("1")
+        img = background.convert("RGB")
 
-    logo_dest.parent.mkdir(parents=True, exist_ok=True)
-    img.save(logo_dest)
+        # Resize
+        height = int(img.height * (target_width / img.width))
+        img = img.resize((target_width, height), Image.LANCZOS)
 
-    print("Logo prepared: %s", logo_dest)
+        # Convert to black/white
+        img = img.convert("1")
 
-    return logo_dest
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        img.save(destination)
 
-def prepare_pao_logo_small() -> Path | None:
-    logo_src = Path("assets") / "logo" / "pao_logo_black_v1.png"
-    logo_dest = Path("assets") / "logo" / "pao_logo_resized.png"
+        print(f"Prepared image: {destination}")
 
-    if not logo_src.exists():
-        print("Logo not found at '%s' - skipping logo.", logo_src)
-        return None
+        return destination
 
-    img = Image.open(logo_src).convert("RGBA")
+    @staticmethod
+    def line(width=EnvReaderUtil.printer_paper_pixel_width, height=2):
+        """
+        Adds straight horizontal line to receipt
+        """
 
-    # Apply white background behind transparent areas
-    background = Image.new("RGBA", img.size, (255, 255, 255, 255))
-    background.paste(img, mask=img.split()[3])
+        img = Image.new("1", (width, height), 1)
+        draw = ImageDraw.Draw(img)
+        draw.line((0, 0, width, 0), fill=0, width=2)
+        
+        printer = get_printer()
+        printer.text("\n")
+        printer.image(img)
+        printer.text("\n")
 
-    img = background.convert("RGB")
+    @staticmethod
+    def left_right(left_word: str, right_word: str) -> str:
+        """
+        Put one word to the left and another to the right
+        """
 
-    # Resize while preserving aspect ratio
-    logo_width = 80
-    height = int(img.height * (logo_width / img.width))
-    img = img.resize((logo_width, height), Image.LANCZOS)
+        return left_word + right_word.rjust(EnvReaderUtil.printer_paper_character_width - len(left_word)) + "\n"
 
-    # Convert image to black and white
-    img = img.convert("1")
+    @staticmethod
+    def current_date_time(fmt: str = "%d.%m.%Y um %H:%M:%S") -> str:
+        """
+        Current date and time formatted
+        """
 
-    logo_dest.parent.mkdir(parents=True, exist_ok=True)
-    img.save(logo_dest)
+        return datetime.now().strftime(fmt)
 
-    print("Logo prepared: %s", logo_dest)
+    @staticmethod
+    def format_money(value: Decimal) -> str:
+        """
+        Decimal to readable
+        """
 
-    return logo_dest
+        amount = value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return f"{amount:.2f}€"
 
-def prepare_turanics_logo() -> Path | None:
-    logo_src = Path("assets") / "turanics_logo.png"
-    logo_dest = Path("assets") / "turanics_logo_resized.png"
+    @staticmethod
+    def format_timestamp(timestamp: str) -> str:
+        """
+        Convert ISO timestamp into a readable date format.
+        """
 
-    if not logo_src.exists():
-        print("Logo not found at '%s' - skipping logo.", logo_src)
-        return None
+        try:
+            dt = datetime.fromisoformat(timestamp)
+            return dt.strftime("%d.%m.%Y um %H:%M:%S")
+        except (ValueError, TypeError):
+            return str(timestamp)
 
-    img = Image.open(logo_src).convert("RGBA")
+    @classmethod
+    def footer_img(cls) -> Path | None:
+        """
+        Footer image
+        """
 
-    # Apply white background behind transparent areas
-    background = Image.new("RGBA", img.size, (255, 255, 255, 255))
-    background.paste(img, mask=img.split()[3])
+        return cls._prepare_img(
+            source=cls._ASSET_DIR / "footer" / "footer.png",
+            destination=cls._ASSET_DIR / "footer" / "footer_resized.png",
+            target_width=EnvReaderUtil.printer_paper_pixel_width
+        )
 
-    img = background.convert("RGB")
+    @classmethod
+    def checkmark_img(cls) -> Path | None:
+        """
+        Checkmark image
+        """
 
-    # Resize while preserving aspect ratio
-    logo_width = 80
-    height = int(img.height * (logo_width / img.width))
-    img = img.resize((logo_width, height), Image.LANCZOS)
+        return cls._prepare_img(
+            source=cls._ASSET_DIR / "checkmark.png",
+            destination=cls._ASSET_DIR / "checkmark_resized.png",
+            target_width=300
+        )
 
-    # Convert image to black and white
-    img = img.convert("1")
+    @classmethod
+    def sad_face_img(cls) -> Path | None:
+        """
+        Sad face image
+        """
 
-    logo_dest.parent.mkdir(parents=True, exist_ok=True)
-    img.save(logo_dest)
-
-    print("Logo prepared: %s", logo_dest)
-
-    return logo_dest
-
-def prepare_text_qr_code() -> Path | None:
-    logo_src = Path("assets") / "text_qr.png"
-    logo_dest = Path("assets") / "text_qr_resized.png"
-
-    if not logo_src.exists():
-        print("Logo not found at '%s' - skipping logo.", logo_src)
-        return None
-
-    img = Image.open(logo_src).convert("RGBA")
-
-    # Apply white background behind transparent areas
-    background = Image.new("RGBA", img.size, (255, 255, 255, 255))
-    background.paste(img, mask=img.split()[3])
-
-    img = background.convert("RGB")
-
-    # Resize while preserving aspect ratio
-    logo_width = 575
-    height = int(img.height * (logo_width / img.width))
-    img = img.resize((logo_width, height), Image.LANCZOS)
-
-    # Convert image to black and white
-    img = img.convert("1")
-
-    logo_dest.parent.mkdir(parents=True, exist_ok=True)
-    img.save(logo_dest)
-
-    print("Logo prepared: %s", logo_dest)
-
-    return logo_dest
-
-def prepare_checkmark_symbol() -> Path | None:
-    symbol_src = Path("assets") / "checkmark.png"
-    symbol_dest = Path("assets") / "checkmark.png"
-
-    if not symbol_src.exists():
-        print("Symbol not found at '%s' - skipping logo.", symbol_src)
-        return None
-
-    img = Image.open(symbol_src).convert("RGBA")
-
-    # Apply white background behind transparent areas
-    background = Image.new("RGBA", img.size, (255, 255, 255, 255))
-    background.paste(img, mask=img.split()[3])
-
-    img = background.convert("RGB")
-
-    # Resize while preserving aspect ratio
-    logo_width = 300
-    height = int(img.height * (logo_width / img.width))
-    img = img.resize((logo_width, height), Image.LANCZOS)
-
-    # Convert image to black and white
-    img = img.convert("1")
-
-    symbol_dest.parent.mkdir(parents=True, exist_ok=True)
-    img.save(symbol_dest)
-
-    print("Logo prepared: %s", symbol_dest)
-
-    return symbol_dest
-
-def combine_logos(logo1_path, logo2_path, spacing=40):
-    img1 = Image.open(logo1_path).convert("RGBA")
-    img2 = Image.open(logo2_path).convert("RGBA")
-
-    max_height = max(img1.height, img2.height)
-    ratio1 = max_height / img1.height
-    ratio2 = max_height / img2.height
-
-    img1 = img1.resize((int(img1.width * ratio1), max_height))
-    img2 = img2.resize((int(img2.width * ratio2), max_height))
-
-    new_width = img1.width + spacing + img2.width
-
-    combined = Image.new("RGBA", (new_width, max_height), (255, 255, 255, 0))
-    combined.paste(img1, (0, 0))
-    combined.paste(img2, (img1.width + spacing, 0))
-
-    return combined
+        return cls._prepare_img(
+            source=cls._ASSET_DIR / "sad_face.png",
+            destination=cls._ASSET_DIR / "sad_face_resized.png",
+            target_width=300
+        )

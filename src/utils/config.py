@@ -1,26 +1,41 @@
-from pathlib import Path
 from escpos.printer import Usb
+from src.utils.env_reader import EnvReaderUtil
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+class PrinterConfig:
+    """
+    Printer configuration for Epson TM-T20III
+    """
 
-# Startup status file written by the initial listener handshake.
-STARTUP_FILE = PROJECT_ROOT / "var" / "startup_status.txt"
+    USB_VENDOR_ID = 0x04B8
+    USB_PRODUCT_ID = 0x0E28
+    USB_IN_EP = 0x82
+    USB_OUT_EP = 0x01
 
-# USB printer configuration for Epson TM-T20III.
-USB_VENDOR_ID = 0x04B8
-USB_PRODUCT_ID = 0x0E28
-USB_IN_EP = 0x82
-USB_OUT_EP = 0x01
+    _printer_instance = None
 
-# Logo settings for receipt printing.
-LOGO_SRC = PROJECT_ROOT / "assets" / "logo" / "pao_logo_black_v1.png"
-LOGO_DEST = PROJECT_ROOT / "assets" / "logo" / "pao_logo_resized.png"
-LOGO_WIDTH = 400
+    @classmethod
+    def get_printer(cls) -> Usb:
+        if cls._printer_instance is None:
+            env = EnvReaderUtil.from_env()
 
-printer = Usb(
-    USB_VENDOR_ID,
-    USB_PRODUCT_ID,
-    timeout=0,
-    in_ep=USB_IN_EP,
-    out_ep=USB_OUT_EP,
-)
+            printer = Usb(
+                cls.USB_VENDOR_ID,
+                cls.USB_PRODUCT_ID,
+                timeout=0,
+                in_ep=cls.USB_IN_EP,
+                out_ep=cls.USB_OUT_EP,
+            )
+
+            printer.profile.profile_data["media"]["width"]["pixel"] = env.printer_paper_pixel_width
+
+            cls._printer_instance = printer
+
+        return cls._printer_instance
+
+
+def get_printer() -> Usb:
+    """
+    Shortcut to avoid writing PrinterConfig.get_printer() everywhere.
+    """
+
+    return PrinterConfig.get_printer()

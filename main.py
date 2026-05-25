@@ -2,16 +2,16 @@ import sys
 from datetime import datetime
 
 from src.websocket_listener import WebSocketListener
-from src.utils.env_reader import Env, build_api_url, build_ws_url, load_environment
+from src.utils.env_reader import EnvReaderUtil
 
-def print_banner(runtime_env: str, env: Env) -> None:
+def print_banner(runtime_env: str, env: EnvReaderUtil) -> None:
     print("")
     print(f"place-an-order-printer ({env.version}v)")
     print("By Turanics")
     print(f"Copyright © {datetime.now().year}")
     print("")
-    print(f"Endpoints:                  {build_api_url(env)}")
-    print(f"WebSockets:                 {build_ws_url(env)}")
+    print(f"Endpoints:                  {EnvReaderUtil.build_api_url(env)}")
+    print(f"WebSockets:                 {EnvReaderUtil.build_ws_url(env)}")
     print("")
 
     if runtime_env == "dev":
@@ -23,8 +23,8 @@ def print_banner(runtime_env: str, env: Env) -> None:
 def main() -> None:
     runtime_env = sys.argv[1].strip().lower()
 
-    load_environment(runtime_env)
-    env = Env.from_env()
+    EnvReaderUtil.load_environment(runtime_env)
+    env = EnvReaderUtil.from_env()
 
     print_banner(runtime_env, env)
 

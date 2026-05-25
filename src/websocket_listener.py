@@ -4,14 +4,15 @@ import logging
 import websockets
 
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
-from src.prints.initial_status import print_initial_status, print_initial_failure
-from src.prints.receipt import print_receipt
-from src.utils.env_reader import Env, build_ws_url
+from src.prints.receipt import ReceiptPrint
+from src.prints.init import InitPrint
+from src.utils.env_reader import EnvReaderUtil
+from src.utils.boot_marker import BootMarkerUtil
 
 class WebSocketListener:
-    def __init__(self, env: Env) -> None:
+    def __init__(self, env: EnvReaderUtil) -> None:
         self._env = env
-        self.url = build_ws_url(env)
+        self.url = EnvReaderUtil.build_ws_url(env)
         self.token = env.device_token
 
         self.reconnect_delay = env.websocket_reconnect_time
@@ -50,7 +51,10 @@ class WebSocketListener:
                 # Print initial failure on first attempt if connection fails
                 if not success:
                     try:
-                        print_initial_failure()
+                        BootMarkerUtil.check_init_print()
+                        if self._env.printer_disable_init:
+                            return
+                        InitPrint.failure()
                     except Exception as exc:
                         print(f"[ ERROR ] Failure receipt print failed: {exc}")
 
@@ -139,7 +143,10 @@ class WebSocketListener:
 
         if operation == "INITIAL":
             try:
-                print_initial_status()
+                BootMarkerUtil.check_init_print()
+                if self._env.printer_disable_init:
+                    return
+                InitPrint.success()
             except Exception as exc:
                 print(f"[ ERROR ] Initial status print failed: {exc}")
             return
@@ -147,7 +154,7 @@ class WebSocketListener:
         if data:
             print(f"[ INFO ] Receipt event received – operation={operation} data={data}")
             try:
-                print_receipt(data)
+                ReceiptPrint.receipt(data)
             except Exception as exc:
                 print(f"[ ERROR ] Printing failed: {exc}")
             return
