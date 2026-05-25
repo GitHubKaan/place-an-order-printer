@@ -2,7 +2,7 @@
 
 The Place An Order Printer Service is a system designed to process and print orders received via the Place An Order API.
 
-<img src="assets/logo/pao_logo_white_v1.png" width="200px"/>
+<img src="assets/pao_logo_white_v1.png" width="200px"/>
 
 > [!CAUTION]
 > © 2026 Kâan Turan, acting under Place An Order and Turanics. All rights reserved. Unauthorized use, copying, modification, distribution, or reproduction of this software and its associated files is strictly prohibited. Warranty claims shall be deemed void if the official tamper-evident seals are removed, damaged, or altered. In such cases, Place An Order reserves the right to refuse repair or servicing of the device.
