@@ -44,10 +44,6 @@ class ReceiptPrint:
             if canceled:
                 printer.text("+++ BESTELLUNG WURDE STORNIERT +++\n")
 
-            paid = data.get("order").get("paid")
-            if not paid:
-                printer.text("+++ BESTELLUNG WURDE NICHT BEZAHLT +++\n")
-
             printer.text("\n")
 
             # ===== General info =============================================================================================
@@ -91,6 +87,27 @@ class ReceiptPrint:
                 to_go_name_left_right = FormatUtil.left_right("To-go-Name:", to_go_name)
                 printer.text(to_go_name_left_right)
 
+            printer.text("\n")
+
+            paid = data.get("order").get("paid")
+            if paid:
+                paid_left_right = FormatUtil.left_right("Bezahlstatus:", "BEZAHLT")
+                printer.text(paid_left_right)
+            else:
+                paid_left_right = FormatUtil.left_right("Bezahlstatus:", "OFFEN")
+                printer.text(paid_left_right)
+
+            stripe_used = (
+                data.get("order").get("stripeID") is not None
+                or data.get("order").get("stripePaymentIntent") is not None
+            )
+            if stripe_used:
+                stripe_used_left_right = FormatUtil.left_right("Bezahlart:", "KARTE")
+                printer.text(stripe_used_left_right)
+            else:
+                stripe_used_left_right = FormatUtil.left_right("Bezahlart:", "BAR")
+                printer.text(stripe_used_left_right)
+
             FormatUtil.line()
 
             # ===== Ordered items =============================================================================================
@@ -131,7 +148,7 @@ class ReceiptPrint:
             # ===== Footer =============================================================================================
             footer_img = str(FormatUtil.footer_img())
             printer.image(footer_img)
-            
+
             printer.cut()
 
             print("Receipt printed successfully: %s", receipt_id)
