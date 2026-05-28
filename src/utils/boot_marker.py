@@ -1,7 +1,6 @@
 from pathlib import Path
 from datetime import datetime
 
-
 class BootMarkerUtil:
     _RUNTIME_DIR = Path("/run/place-an-order-printer")
 
@@ -28,9 +27,16 @@ class BootMarkerUtil:
 
     @staticmethod
     def check_init_print() -> bool:
-        """Returns True if this is the first print this boot."""
-        if BootMarkerUtil._initial_status_already_printed():
+        path = BootMarkerUtil._get_boot_marker_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            fd = path.open("x")
+            fd.write(datetime.now().isoformat())
+            fd.close()
+            return True
+        except FileExistsError:
             print("Initial startup receipt already printed for this boot.")
             return False
-        BootMarkerUtil._mark_initial_status_printed()
-        return True
+        except Exception as e:
+            print(f"[ WARNING ] Boot marker check failed: {e}")
+            return False
