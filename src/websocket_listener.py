@@ -51,10 +51,9 @@ class WebSocketListener:
                 # Print initial failure on first attempt if connection fails
                 if not success:
                     try:
-                        BootMarkerUtil.check_init_print()
-                        if self._env.printer_disable_init:
-                            return
-                        InitPrint.failure()
+                        if BootMarkerUtil.check_init_print():
+                            if not self._env.printer_disable_init:
+                                InitPrint.failure()
                     except Exception as exc:
                         print(f"[ ERROR ] Failure receipt print failed: {exc}")
 
@@ -143,10 +142,9 @@ class WebSocketListener:
 
         if operation == "INITIAL":
             try:
-                BootMarkerUtil.check_init_print()
-                if self._env.printer_disable_init:
-                    return
-                InitPrint.success()
+                if BootMarkerUtil.check_init_print():
+                    if not self._env.printer_disable_init:
+                        InitPrint.success()
             except Exception as exc:
                 print(f"[ ERROR ] Initial status print failed: {exc}")
             return

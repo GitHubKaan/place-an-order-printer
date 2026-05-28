@@ -27,8 +27,10 @@ class BootMarkerUtil:
             print(f"Warning: Could not write boot marker: {e}")
 
     @staticmethod
-    def check_init_print() -> None:
+    def check_init_print() -> bool:
+        """Returns True if this is the first print this boot."""
         if BootMarkerUtil._initial_status_already_printed():
             print("Initial startup receipt already printed for this boot.")
-        else:
-            BootMarkerUtil._mark_initial_status_printed()
+            return False
+        BootMarkerUtil._mark_initial_status_printed()
+        return True
