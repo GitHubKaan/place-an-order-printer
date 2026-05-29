@@ -19,9 +19,6 @@ GITHUB_REPO="https://github.com/GitHubKaan/place-an-order-printer"
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Environment Config (.env.prod) ────────────────────────────────────────────
-ENV_NAME="PROD"
-ENV_VERSION="1"
-
 ENV_API_VERSION="1"
 ENV_API_HTTPS="false"
 ENV_API_WWW="false"
@@ -30,7 +27,6 @@ ENV_API_PORT="4000"
 ENV_API_PATH="api"
 
 ENV_WEBSOCKET_PATH="ws"
-ENV_WEBSOCKET_RECONNECT_TIME="5"
 
 ENV_DEVICE_TOKEN=""
 # ─────────────────────────────────────────────────────────────────────────────
@@ -223,8 +219,8 @@ ENV_FILE="${APP_DIR}/.env.prod"
 cat > "${ENV_FILE}" <<EOF
 # GENERAL
 # Choose between DEV or PROD (.env.dev = DEV; .env.prod = PROD)
-ENV=${ENV_NAME}
-VERSION=${ENV_VERSION}
+ENV=PROD
+VERSION=1
 # API
 API_VERSION=${ENV_API_VERSION}
 API_HTTPS=${ENV_API_HTTPS}
@@ -240,7 +236,14 @@ API_PATH=${ENV_API_PATH}
 # Optional (do not add slashes to the front or back)
 WEBSOCKET_PATH=${ENV_WEBSOCKET_PATH}
 # WebSocket timeout until reconnect attempt (in seconds)
-WEBSOCKET_RECONNECT_TIME=${ENV_WEBSOCKET_RECONNECT_TIME}
+WEBSOCKET_RECONNECT_TIME=5
+# PRINTER
+# Width for 80mm printer is 576 pixel
+PRINTER_PAPER_PIXEL_WIDTH=576
+# How many characters per row (48 for 80mm)
+PRINTER_PAPER_CHARACTER_WIDTH=48
+# Disable initial print (for connection status)
+PRINTER_DISABLE_INIT=false
 # AUTHORIZATION
 DEVICE_TOKEN=${ENV_DEVICE_TOKEN}
 EOF
