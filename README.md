@@ -1,6 +1,6 @@
 # place-an-order-printer
 
-The Place An Order Printer Service is a system designed to process and print orders received via the Place An Order API.
+Place An Order Printer is a service designed to process and print orders received via the Place An Order API.
 
 <img src="assets/pao_logo_white_v1.png" width="200px"/>
 
