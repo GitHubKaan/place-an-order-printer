@@ -1,3 +1,5 @@
+import platform
+import subprocess
 from pathlib import Path
 from datetime import datetime
 
@@ -5,9 +7,27 @@ class BootMarkerUtil:
     _RUNTIME_DIR = Path("/run/place-an-order-printer")
 
     @staticmethod
+    def _get_boot_id() -> str:
+        if platform.system() == "Linux":
+            return Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+        elif platform.system() == "Darwin":
+            result = subprocess.run(
+                ["sysctl", "-n", "kern.boottime"],
+                capture_output=True, text=True, check=True
+            )
+            # Output: "{ sec = 1234567890, usec = 0 } ..."
+            sec = result.stdout.split("sec =")[1].split(",")[0].strip()
+            return f"mac-{sec}"
+        return "dev-fallback"
+
+    @staticmethod
     def _get_boot_marker_path() -> Path:
-        boot_id = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
-        return BootMarkerUtil._RUNTIME_DIR / f"boot-{boot_id}"
+        if platform.system() == "Darwin":
+            runtime_dir = Path("/tmp/place-an-order-printer")
+        else:
+            runtime_dir = BootMarkerUtil._RUNTIME_DIR
+        boot_id = BootMarkerUtil._get_boot_id()
+        return runtime_dir / f"boot-{boot_id}"
 
     @staticmethod
     def _initial_status_already_printed() -> bool:

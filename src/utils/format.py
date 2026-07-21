@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 from src.utils.config import PrinterConfig, get_printer
@@ -84,10 +84,10 @@ class FormatUtil:
     @staticmethod
     def format_money(value: Decimal) -> str:
         """
-        Decimal to readable
+        Cents (integer) to readable euro string, e.g. 999 → "9.99€"
         """
 
-        amount = value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        amount = (value / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         return f"{amount:.2f}€"
 
     @staticmethod
@@ -101,6 +101,52 @@ class FormatUtil:
             return dt.strftime("%d.%m.%Y um %H:%M:%S")
         except (ValueError, TypeError):
             return str(timestamp)
+
+    @classmethod
+    def to_go_name_img(cls, text: str) -> Image.Image:
+        paper_width = EnvReaderUtil.printer_paper_pixel_width
+        target_width = int(paper_width * 0.85)
+
+        font_paths = [
+            # Linux / Raspberry Pi
+            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+            Path("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"),
+            Path("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
+            Path("/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf"),
+            # macOS (development)
+            Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
+            Path("/Library/Fonts/Arial Bold.ttf"),
+            Path("/System/Library/Fonts/Supplemental/Impact.ttf"),
+        ]
+        font_path = next((p for p in font_paths if p.exists()), None)
+
+        # Scale font size down until text fits target width
+        dummy = Image.new("RGB", (1, 1))
+        draw = ImageDraw.Draw(dummy)
+        font = None
+        bbox = (0, 0, 0, 0)
+
+        for font_size in range(160, 9, -10):
+            try:
+                font = ImageFont.truetype(str(font_path), font_size) if font_path else ImageFont.load_default()
+            except Exception:
+                font = ImageFont.load_default()
+            bbox = draw.textbbox((0, 0), text, font=font)
+            text_width = bbox[2] - bbox[0]
+            if text_width <= target_width:
+                break
+
+        # bbox = (left, top, right, bottom) relative to anchor (0, 0).
+        # Image height must fit bbox[3] (absolute bottom) + padding on both sides.
+        # Using (bbox[3] - bbox[1]) would undercount when bbox[1] > 0, cutting off the bottom.
+        padding = 20
+        text_width = bbox[2] - bbox[0]
+        img = Image.new("1", (paper_width, bbox[3] + padding * 2), 1)
+        draw = ImageDraw.Draw(img)
+        x = max(0, (paper_width - text_width) // 2)
+        draw.text((x, padding), text, font=font, fill=0)
+
+        return img
 
     @classmethod
     def footer_img(cls) -> Path | None:
